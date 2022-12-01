@@ -1,0 +1,6 @@
+{
+  "watch": ["./*", "./**/*"],
+  "ext": "js,ts,json,.env",
+  "ignore": ["*.test.ts"],
+  "exec": "ts-node -r dotenv/config --typeCheck index.ts dotenv_path=./.env"
+}

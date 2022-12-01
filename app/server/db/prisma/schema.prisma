@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URI")
+}
+
+model User {
+  id              Int           @id @unique @default(autoincrement())
+  userId          String        @unique @default(cuid())
+  created         DateTime      @default(now())
+  updated         DateTime      @updatedAt
+  legalName       String        @db.VarChar(255)
+  gender          Gender?
+  language        Language      @default(ENG)
+  currency        Currency      @default(USD)
+  email           String        @unique
+  phoneNumber     String?       @unique
+  address         String        @db.VarChar(255)
+  emContact       String        @db.VarChar(255)
+  isSilenced      Boolean       @default(false)
+  isEmailSilenced Boolean       @default(false)
+  isHost          Boolean       @default(false)
+  isLocked        Boolean       @default(false)
+  isConfirmed     Boolean       @default(false)
+  chatId          Int?
+  Chat            Chat?         @relation(fields: [chatId], references: [id])
+  wishlists       List[]
+  messages        Message[]
+  reservations    Reservation[]
+  reviews         Review[]
+  Sensitive       Sensitive?
+}
+
+model Sensitive {
+  id         Int      @id @default(autoincrement())
+  created    DateTime @default(now())
+  updated    DateTime @updatedAt
+  guestId    Int      @unique
+  Password   String?
+  creditCard String?
+  googleId   String?
+  guest      User     @relation(fields: [guestId], references: [id])
+}
+
+model Course {
+  id           Int           @id @default(autoincrement())
+  created      DateTime      @default(now())
+  updated      DateTime      @updatedAt
+  name         String
+  profile      String
+  photos       Photo[]
+  reservations Reservation[]
+  reviews      Review[]
+  lists        List[]
+}
+
+model Photo {
+  id       Int    @id @default(autoincrement())
+  caption  String
+  link     String
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+}
+
+model Reservation {
+  id       Int      @id @default(autoincrement())
+  created  DateTime @default(now())
+  updated  DateTime @updatedAt
+  status   Status   @default(OPEN)
+  checkIn  DateTime
+  price    Decimal
+  party    Int
+  guestId  Int
+  courseId Int
+  Course   Course   @relation(fields: [courseId], references: [id])
+  guest    User     @relation(fields: [guestId], references: [id])
+}
+
+model Review {
+  id            Int      @id @default(autoincrement())
+  created       DateTime @default(now())
+  updated       DateTime @updatedAt
+  content       String
+  userId        Int
+  courseId      Int
+  value         Int
+  averageRating Float
+  Course        Course   @relation(fields: [courseId], references: [id])
+  User          User     @relation(fields: [userId], references: [id])
+}
+
+model Message {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+  userId  Int
+  chatId  Int
+  text    String
+  Chat    Chat     @relation(fields: [chatId], references: [id])
+  User    User     @relation(fields: [userId], references: [id])
+}
+
+model Chat {
+  id           Int       @id @default(autoincrement())
+  created      DateTime  @default(now())
+  updated      DateTime  @updatedAt
+  messages     Message[]
+  participants User[]
+}
+
+model List {
+  id      Int      @id @default(autoincrement())
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+  userId  Int
+  name    String
+  User    User     @relation(fields: [userId], references: [id])
+  courses Course[]
+}
+
+enum Status {
+  OPEN
+  BOOKED
+  CANCELED
+  COMPLETED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Language {
+  ENG
+}
+
+enum Currency {
+  USD
+}
